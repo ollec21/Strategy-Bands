@@ -6,7 +6,7 @@
 
 // Defines strategy's parameter values for the given pair symbol and timeframe.
 struct Stg_Bands_EURUSD_M30_Params : Stg_Bands_Params {
-  void Stg_Bands_EURUSD_M30_Params() {
+  Stg_Bands_EURUSD_M30_Params() {
     symbol = "EURUSD";
     tf = PERIOD_M30;
     Bands_Period = 2;
