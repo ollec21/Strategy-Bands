@@ -23,11 +23,11 @@ INPUT int Bands_HShift = 0; // Horizontal shift
 INPUT int Bands_Shift = 0; // Shift (relative to the current bar, 0 - default)
 INPUT ENUM_TRAIL_TYPE Bands_TrailingStopMethod = 7; // Trail stop method
 INPUT ENUM_TRAIL_TYPE Bands_TrailingProfitMethod = 22; // Trail profit method
-INPUT int Bands_SignalLevel1 = 18; // Signal level 1
-INPUT int Bands_SignalLevel2 = 0; // Signal level 2
+INPUT int Bands_SignalOpenLevel = 18; // Signal open level
 INPUT int Bands_SignalBaseMethod = -85; // Signal method (-127-127)
 INPUT int Bands_SignalOpenMethod1 = 971; // Open condition 1 (0-1023)
 INPUT int Bands_SignalOpenMethod2 = 0; // Open condition 2 (0-1023)
+INPUT int Bands_SignalCloseLevel = 0; // Signal close level
 INPUT ENUM_MARKET_EVENT Bands_SignalCloseMethod1 = 24; // Close condition
 INPUT ENUM_MARKET_EVENT Bands_SignalCloseMethod2 = 0; // Close condition
 INPUT double Bands_MaxSpread  =  0; // Max spread to trade (pips)
@@ -41,11 +41,11 @@ struct Stg_Bands_Params : Stg_Params {
   int Bands_Shift;
   ENUM_TRAIL_TYPE Bands_TrailingStopMethod;
   ENUM_TRAIL_TYPE Bands_TrailingProfitMethod;
-  double Bands_SignalLevel1;
-  double Bands_SignalLevel2;
+  double Bands_SignalOpenLevel;
   long Bands_SignalBaseMethod;
   long Bands_SignalOpenMethod1;
   long Bands_SignalOpenMethod2;
+  double Bands_SignalCloseLevel;
   ENUM_MARKET_EVENT Bands_SignalCloseMethod1;
   ENUM_MARKET_EVENT Bands_SignalCloseMethod2;
   double Bands_MaxSpread;
@@ -59,11 +59,11 @@ struct Stg_Bands_Params : Stg_Params {
     Bands_Shift(::Bands_Shift),
     Bands_TrailingStopMethod(::Bands_TrailingStopMethod),
     Bands_TrailingProfitMethod(::Bands_TrailingProfitMethod),
-    Bands_SignalLevel1(::Bands_SignalLevel1),
-    Bands_SignalLevel2(::Bands_SignalLevel2),
+    Bands_SignalOpenLevel(::Bands_SignalOpenLevel),
     Bands_SignalBaseMethod(::Bands_SignalBaseMethod),
     Bands_SignalOpenMethod1(::Bands_SignalOpenMethod1),
     Bands_SignalOpenMethod2(::Bands_SignalOpenMethod2),
+    Bands_SignalCloseLevel(::Bands_SignalCloseLevel),
     Bands_SignalCloseMethod1(::Bands_SignalCloseMethod1),
     Bands_SignalCloseMethod2(::Bands_SignalCloseMethod2),
     Bands_MaxSpread(::Bands_MaxSpread)
@@ -108,7 +108,7 @@ class Stg_Bands : public Strategy {
       _params.Bands_SignalBaseMethod,
       _params.Bands_SignalOpenMethod1, _params.Bands_SignalOpenMethod2,
       _params.Bands_SignalCloseMethod1, _params.Bands_SignalCloseMethod2,
-      _params.Bands_SignalLevel1, _params.Bands_SignalLevel2
+      _params.Bands_SignalOpenLevel, _params.Bands_SignalCloseLevel
     );
     sparams.SetStops(_params.Bands_TrailingProfitMethod, _params.Bands_TrailingStopMethod);
     sparams.SetMaxSpread(_params.Bands_MaxSpread);
@@ -118,15 +118,10 @@ class Stg_Bands : public Strategy {
   }
 
   /**
-   * Check if Bands indicator is on buy or sell.
+   * Check strategy's opening signal.
    *
-   * @param
-   *   cmd (int) - type of trade order command
-   *   period (int) - period to check for
-   *   _signal_method (int) - signal method to use by using bitwise AND operation
-   *   _signal_level1 (double) - signal level to consider the signal
    */
-  bool SignalOpen(ENUM_ORDER_TYPE cmd, long _signal_method = EMPTY, double _signal_level1 = EMPTY, double _signal_level2 = EMPTY) {
+  bool SignalOpen(ENUM_ORDER_TYPE _cmd, long _signal_method = EMPTY, double _signal_level = EMPTY) {
     bool _result = false;
     double bands_0_base  = ((Indi_Bands *) this.Data()).GetValue(BAND_BASE, 0);
     double bands_0_lower = ((Indi_Bands *) this.Data()).GetValue(BAND_LOWER, 0);
@@ -138,12 +133,11 @@ class Stg_Bands : public Strategy {
     double bands_2_lower = ((Indi_Bands *) this.Data()).GetValue(BAND_LOWER, 2);
     double bands_2_upper = ((Indi_Bands *) this.Data()).GetValue(BAND_UPPER, 2);
     if (_signal_method == EMPTY) _signal_method = GetSignalBaseMethod();
-    if (_signal_level1 == EMPTY) _signal_level1 = GetSignalLevel1();
-    if (_signal_level2 == EMPTY) _signal_level2 = GetSignalLevel2();
+    if (_signal_level == EMPTY) _signal_level = GetSignalOpenLevel();
     double lowest = fmin(Low[CURR], fmin(Low[PREV], Low[FAR]));
     double highest = fmax(High[CURR], fmax(High[PREV], High[FAR]));
-    double level = _signal_level1 * Chart().GetPipSize();
-    switch (cmd) {
+    double level = _signal_level * Chart().GetPipSize();
+    switch (_cmd) {
       // Buy: price crossed lower line upwards (returned to it from below).
       case ORDER_TYPE_BUY:
         // Price value was lower than the lower band.
@@ -180,6 +174,15 @@ class Stg_Bands : public Strategy {
         break;
     }
     return _result;
+  }
+
+  /**
+   * Check strategy's closing signal.
+   *
+   */
+  bool SignalClose(ENUM_ORDER_TYPE _cmd, long _signal_method = EMPTY, double _signal_level = EMPTY) {
+    if (_signal_level == EMPTY) _signal_level = GetSignalCloseLevel();
+    return SignalOpen(Order::NegateOrderType(_cmd), _signal_method, _signal_level);
   }
 
 };

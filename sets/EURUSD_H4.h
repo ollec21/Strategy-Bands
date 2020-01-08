@@ -16,11 +16,11 @@ struct Stg_Bands_EURUSD_H4_Params : Stg_Bands_Params {
     Bands_Shift = 0;
     Bands_TrailingStopMethod = 7;
     Bands_TrailingProfitMethod = 22;
-    Bands_SignalLevel1 = 18;
-    Bands_SignalLevel2 = 0;
+    Bands_SignalOpenLevel = 18;
     Bands_SignalBaseMethod = -85;
     Bands_SignalOpenMethod1 = 971;
     Bands_SignalOpenMethod2 = 0;
+    Bands_SignalCloseLevel = 0;
     Bands_SignalCloseMethod1 = 24;
     Bands_SignalCloseMethod2 = 0;
     Bands_MaxSpread = 10;
