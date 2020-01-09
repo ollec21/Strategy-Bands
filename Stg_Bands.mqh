@@ -16,7 +16,7 @@
 // User input params.
 INPUT string __Bands_Parameters__ = "-- Bands strategy params --";  // >>> BANDS <<<
 INPUT int Bands_Active_Tf = 127;  // Activate timeframes (1-255, e.g. M1=1,M5=2,M15=4,M30=8,H1=16,H2=32,H4=64...)
-INPUT int Bands_Period = 2;       // Period for M1
+INPUT int Bands_Period = 2;       // Period
 INPUT ENUM_APPLIED_PRICE Bands_Applied_Price = PRICE_CLOSE;  // Applied Price
 INPUT double Bands_Deviation = 0.3;                          // Deviation
 INPUT int Bands_HShift = 0;                                  // Horizontal shift
@@ -24,7 +24,7 @@ INPUT int Bands_Shift = 0;                                   // Shift (relative 
 INPUT ENUM_TRAIL_TYPE Bands_TrailingStopMethod = 7;          // Trail stop method
 INPUT ENUM_TRAIL_TYPE Bands_TrailingProfitMethod = 22;       // Trail profit method
 INPUT int Bands_SignalOpenLevel = 18;                        // Signal open level
-INPUT int Bands_SignalBaseMethod = -85;                      // Signal method (-127-127)
+INPUT int Bands_SignalBaseMethod = -85;                      // Signal base method (-127-127)
 INPUT int Bands_SignalOpenMethod1 = 971;                     // Open condition 1 (0-1023)
 INPUT int Bands_SignalOpenMethod2 = 0;                       // Open condition 2 (0-1023)
 INPUT int Bands_SignalCloseLevel = 0;                        // Signal close level
@@ -160,7 +160,7 @@ class Stg_Bands : public Strategy {
           if (METHOD(_signal_method, 4)) _result &= highest > bands_0_base;
           if (METHOD(_signal_method, 5)) _result &= Open[CURR] < bands_0_base;
           if (METHOD(_signal_method, 6)) _result &= fmin(Close[PREV], Close[FAR]) > bands_0_base;
-          // if (METHOD(_signal_method, 7)) _result &= !Trade_Bands(Convert::NegateOrderType(cmd), (ENUM_TIMEFRAMES)
+          // if (METHOD(_signal_method, 7)) _result &= !Trade_Bands(Convert::NegateOrderType(_cmd), (ENUM_TIMEFRAMES)
           // Convert::IndexToTf(fmin(period + 1, M30)));
         }
         break;
@@ -176,7 +176,7 @@ class Stg_Bands : public Strategy {
           if (METHOD(_signal_method, 4)) _result &= lowest < bands_0_base;
           if (METHOD(_signal_method, 5)) _result &= Open[CURR] > bands_0_base;
           if (METHOD(_signal_method, 6)) _result &= fmin(Close[PREV], Close[FAR]) < bands_0_base;
-          // if (METHOD(_signal_method, 7)) _result &= !Trade_Bands(Convert::NegateOrderType(cmd), (ENUM_TIMEFRAMES)
+          // if (METHOD(_signal_method, 7)) _result &= !Trade_Bands(Convert::NegateOrderType(_cmd), (ENUM_TIMEFRAMES)
           // Convert::IndexToTf(fmin(period + 1, M30)));
         }
         break;
