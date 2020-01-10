@@ -14,15 +14,12 @@ struct Stg_Bands_EURUSD_M30_Params : Stg_Bands_Params {
     Bands_HShift = 0;
     Bands_Applied_Price = PRICE_CLOSE;
     Bands_Shift = 0;
-    Bands_TrailingStopMethod = 7;
-    Bands_TrailingProfitMethod = 22;
+    Bands_SignalOpenMethod = 0;
     Bands_SignalOpenLevel = 18;
-    Bands_SignalBaseMethod = -85;
-    Bands_SignalOpenMethod1 = 971;
-    Bands_SignalOpenMethod2 = 0;
-    Bands_SignalCloseLevel = 0;
-    Bands_SignalCloseMethod1 = 24;
-    Bands_SignalCloseMethod2 = 0;
+    Bands_SignalCloseMethod = 0;
+    Bands_SignalCloseLevel = 18;
+    Bands_PriceLimitMethod = 0;
+    Bands_PriceLimitLevel = 0;
     Bands_MaxSpread = 5;
   }
 };
