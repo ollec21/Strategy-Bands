@@ -15,19 +15,18 @@
 
 // User input params.
 INPUT string __Bands_Parameters__ = "-- Bands strategy params --";  // >>> BANDS <<<
-INPUT int Bands_Active_Tf = 127;  // Activate timeframes (1-255, e.g. M1=1,M5=2,M15=4,M30=8,H1=16,H2=32,H4=64...)
-INPUT int Bands_Period = 2;       // Period
-INPUT ENUM_APPLIED_PRICE Bands_Applied_Price = PRICE_CLOSE;  // Applied Price
-INPUT double Bands_Deviation = 0.3;                          // Deviation
-INPUT int Bands_HShift = 0;                                  // Horizontal shift
-INPUT int Bands_Shift = 0;                                   // Shift (relative to the current bar, 0 - default)
-INPUT int Bands_SignalOpenMethod = 0;                        // Signal open method (-63-63)
-INPUT double Bands_SignalOpenLevel = 18;                     // Signal open level (-49-49)
-INPUT int Bands_SignalCloseMethod = 0;                       // Signal close method (-63-63)
-INPUT double Bands_SignalCloseLevel = 18;                    // Signal close level (-49-49)
-INPUT int Bands_PriceLimitMethod = 0;                        // Price limit method (0-6)
-INPUT double Bands_PriceLimitLevel = 0;                      // Price limit level
-INPUT double Bands_MaxSpread = 0;                            // Max spread to trade (pips)
+INPUT int Bands_Period = 2;                                         // Period
+INPUT ENUM_APPLIED_PRICE Bands_Applied_Price = PRICE_CLOSE;         // Applied Price
+INPUT double Bands_Deviation = 0.3;                                 // Deviation
+INPUT int Bands_HShift = 0;                                         // Horizontal shift
+INPUT int Bands_Shift = 0;                                          // Shift (relative to the current bar, 0 - default)
+INPUT int Bands_SignalOpenMethod = 0;                               // Signal open method (-63-63)
+INPUT double Bands_SignalOpenLevel = 18;                            // Signal open level (-49-49)
+INPUT int Bands_SignalCloseMethod = 0;                              // Signal close method (-63-63)
+INPUT double Bands_SignalCloseLevel = 18;                           // Signal close level (-49-49)
+INPUT int Bands_PriceLimitMethod = 0;                               // Price limit method (0-6)
+INPUT double Bands_PriceLimitLevel = 0;                             // Price limit level
+INPUT double Bands_MaxSpread = 0;                                   // Max spread to trade (pips)
 
 // Struct to define strategy parameters to override.
 struct Stg_Bands_Params : Stg_Params {
@@ -172,7 +171,6 @@ class Stg_Bands : public Strategy {
    * Check strategy's closing signal.
    */
   bool SignalClose(ENUM_ORDER_TYPE _cmd, int _method = 0, double _level = 0.0) {
-    if (_level == EMPTY) _level = GetSignalCloseLevel();
     return SignalOpen(Order::NegateOrderType(_cmd), _method, _level);
   }
 
