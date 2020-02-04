@@ -22,6 +22,8 @@ INPUT int Bands_HShift = 0;                                         // Horizonta
 INPUT int Bands_Shift = 0;                                          // Shift (relative to the current bar, 0 - default)
 INPUT int Bands_SignalOpenMethod = 0;                               // Signal open method (-63-63)
 INPUT double Bands_SignalOpenLevel = 18;                            // Signal open level (-49-49)
+INPUT int Bands_SignalOpenFilterMethod = 18;                        // Signal open filter method (-49-49)
+INPUT int Bands_SignalOpenBoostMethod = 18;                         // Signal open boost method (-49-49)
 INPUT int Bands_SignalCloseMethod = 0;                              // Signal close method (-63-63)
 INPUT double Bands_SignalCloseLevel = 18;                           // Signal close level (-49-49)
 INPUT int Bands_PriceLimitMethod = 0;                               // Price limit method (0-6)
@@ -37,6 +39,8 @@ struct Stg_Bands_Params : Stg_Params {
   int Bands_Shift;
   int Bands_SignalOpenMethod;
   double Bands_SignalOpenLevel;
+  int Bands_SignalOpenFilterMethod;
+  int Bands_SignalOpenBoostMethod;
   int Bands_SignalCloseMethod;
   double Bands_SignalCloseLevel;
   int Bands_PriceLimitMethod;
@@ -52,6 +56,8 @@ struct Stg_Bands_Params : Stg_Params {
         Bands_Shift(::Bands_Shift),
         Bands_SignalOpenMethod(::Bands_SignalOpenMethod),
         Bands_SignalOpenLevel(::Bands_SignalOpenLevel),
+        Bands_SignalOpenFilterMethod(::Bands_SignalOpenFilterMethod),
+        Bands_SignalOpenBoostMethod(::Bands_SignalOpenBoostMethod),
         Bands_SignalCloseMethod(::Bands_SignalCloseMethod),
         Bands_SignalCloseLevel(::Bands_SignalCloseLevel),
         Bands_PriceLimitMethod(::Bands_PriceLimitMethod),
@@ -108,8 +114,9 @@ class Stg_Bands : public Strategy {
     StgParams sparams(new Trade(_tf, _Symbol), new Indi_Bands(bands_params, bands_iparams, cparams), NULL, NULL);
     sparams.logger.SetLevel(_log_level);
     sparams.SetMagicNo(_magic_no);
-    sparams.SetSignals(_params.Bands_SignalOpenMethod, _params.Bands_SignalOpenLevel, _params.Bands_SignalCloseMethod,
-                       _params.Bands_SignalCloseLevel);
+    sparams.SetSignals(_params.Bands_SignalOpenMethod, _params.Bands_SignalOpenLevel,
+                       _params.Bands_SignalOpenFilterMethod, _params.Bands_SignalOpenBoostMethod,
+                       _params.Bands_SignalCloseMethod, _params.Bands_SignalCloseLevel);
     sparams.SetPriceLimits(_params.Bands_PriceLimitMethod, _params.Bands_PriceLimitLevel);
     sparams.SetMaxSpread(_params.Bands_MaxSpread);
     // Initialize strategy instance.
@@ -168,6 +175,38 @@ class Stg_Bands : public Strategy {
   }
 
   /**
+   * Check strategy's opening signal additional filter.
+   */
+  bool SignalOpenFilter(ENUM_ORDER_TYPE _cmd, int _method = 0) {
+    bool _result = true;
+    if (_method != 0) {
+      // if (METHOD(_method, 0)) _result &= Trade().IsTrend(_cmd);
+      // if (METHOD(_method, 1)) _result &= Trade().IsPivot(_cmd);
+      // if (METHOD(_method, 2)) _result &= Trade().IsPeakHours(_cmd);
+      // if (METHOD(_method, 3)) _result &= Trade().IsRoundNumber(_cmd);
+      // if (METHOD(_method, 4)) _result &= Trade().IsHedging(_cmd);
+      // if (METHOD(_method, 5)) _result &= Trade().IsPeakBar(_cmd);
+    }
+    return _result;
+  }
+
+  /**
+   * Gets strategy's lot size boost (when enabled).
+   */
+  double SignalOpenBoost(ENUM_ORDER_TYPE _cmd, int _method = 0) {
+    bool _result = 1.0;
+    if (_method != 0) {
+      // if (METHOD(_method, 0)) if (Trade().IsTrend(_cmd)) _result *= 1.1;
+      // if (METHOD(_method, 1)) if (Trade().IsPivot(_cmd)) _result *= 1.1;
+      // if (METHOD(_method, 2)) if (Trade().IsPeakHours(_cmd)) _result *= 1.1;
+      // if (METHOD(_method, 3)) if (Trade().IsRoundNumber(_cmd)) _result *= 1.1;
+      // if (METHOD(_method, 4)) if (Trade().IsHedging(_cmd)) _result *= 1.1;
+      // if (METHOD(_method, 5)) if (Trade().IsPeakBar(_cmd)) _result *= 1.1;
+    }
+    return _result;
+  }
+
+  /**
    * Check strategy's closing signal.
    */
   bool SignalClose(ENUM_ORDER_TYPE _cmd, int _method = 0, double _level = 0.0) {
@@ -177,9 +216,9 @@ class Stg_Bands : public Strategy {
   /**
    * Gets price limit value for profit take or stop loss.
    */
-  double PriceLimit(ENUM_ORDER_TYPE _cmd, ENUM_STG_PRICE_LIMIT_MODE _mode, int _method = 0, double _level = 0.0) {
+  double PriceLimit(ENUM_ORDER_TYPE _cmd, ENUM_ORDER_TYPE_VALUE _mode, int _method = 0, double _level = 0.0) {
     double _trail = _level * Market().GetPipSize();
-    int _direction = Order::OrderDirection(_cmd) * (_mode == LIMIT_VALUE_STOP ? -1 : 1);
+    int _direction = Order::OrderDirection(_cmd) * (_mode == ORDER_TYPE_SL ? -1 : 1);
     double _default_value = Market().GetCloseOffer(_cmd) + _trail * _direction;
     double _result = _default_value;
     double bands_0_base = ((Indi_Bands *)this.Data()).GetValue(BAND_BASE, 0);
