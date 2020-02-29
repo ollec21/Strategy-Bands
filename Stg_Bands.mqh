@@ -105,6 +105,7 @@ class Stg_Bands : public Strategy {
    * Check strategy's opening signal.
    */
   bool SignalOpen(ENUM_ORDER_TYPE _cmd, int _method = 0, double _level = 0.0) {
+    ResetLastError();
     bool _result = false;
     double bands_0_base = ((Indi_Bands *)this.Data()).GetValue(BAND_BASE, 0);
     double bands_0_lower = ((Indi_Bands *)this.Data()).GetValue(BAND_LOWER, 0);
@@ -115,6 +116,10 @@ class Stg_Bands : public Strategy {
     double bands_2_base = ((Indi_Bands *)this.Data()).GetValue(BAND_BASE, 2);
     double bands_2_lower = ((Indi_Bands *)this.Data()).GetValue(BAND_LOWER, 2);
     double bands_2_upper = ((Indi_Bands *)this.Data()).GetValue(BAND_UPPER, 2);
+    if (GetLastError() > 0) {
+      // Returns false when indicator data is not ready.
+      return false;
+    }
     double lowest = fmin(Low[CURR], fmin(Low[PREV], Low[FAR]));
     double highest = fmax(High[CURR], fmax(High[PREV], High[FAR]));
     double level = _level * Chart().GetPipSize();
@@ -207,28 +212,32 @@ class Stg_Bands : public Strategy {
     double bands_2_base = ((Indi_Bands *)this.Data()).GetValue(BAND_BASE, 2);
     double bands_2_lower = ((Indi_Bands *)this.Data()).GetValue(BAND_LOWER, 2);
     double bands_2_upper = ((Indi_Bands *)this.Data()).GetValue(BAND_UPPER, 2);
+    if (GetLastError() > ERR_INDICATOR_DATA_NOT_FOUND) {
+      // Returns false when indicator data is not ready.
+      return false;
+    }
     switch (_method) {
       case 0: {
-        _result = bands_0_base + _trail * _direction;
+        _result = (_direction > 0 ? bands_0_upper : bands_0_lower) + _trail * _direction;
       }
       case 1: {
-        _result = bands_1_base + _trail * _direction;
-      }
-      case 2: {
-        _result = bands_2_base + _trail * _direction;
-      }
-      case 3: {
-        _result = Order::OrderDirection(_cmd) == bands_0_lower + _trail * _direction;
-      }
-      case 4: {
         _result = (_direction > 0 ? bands_1_upper : bands_1_lower) + _trail * _direction;
       }
-      case 5: {
+      case 2: {
         _result = (_direction > 0 ? bands_2_upper : bands_2_lower) + _trail * _direction;
       }
-      case 6: {
+      case 3: {
         _result = (_direction > 0 ? fmax(bands_1_upper, bands_2_upper) : fmin(bands_1_lower, bands_2_lower)) +
                   _trail * _direction;
+      }
+      case 4: {
+        _result = bands_0_base + _trail * _direction;
+      }
+      case 5: {
+        _result = bands_1_base + _trail * _direction;
+      }
+      case 6: {
+        _result = bands_2_base + _trail * _direction;
       }
     }
     return _result;
