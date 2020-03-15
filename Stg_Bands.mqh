@@ -27,7 +27,7 @@ INPUT int Bands_SignalOpenBoostMethod = 18;                         // Signal op
 INPUT int Bands_SignalCloseMethod = 0;                              // Signal close method (-63-63)
 INPUT double Bands_SignalCloseLevel = 18;                           // Signal close level (-49-49)
 INPUT int Bands_PriceLimitMethod = 0;                               // Price limit method (0-6)
-INPUT double Bands_PriceLimitLevel = 0;                             // Price limit level
+INPUT double Bands_PriceLimitLevel = 10;                            // Price limit level
 INPUT double Bands_MaxSpread = 0;                                   // Max spread to trade (pips)
 
 // Struct to define strategy parameters to override.
@@ -105,53 +105,48 @@ class Stg_Bands : public Strategy {
    * Check strategy's opening signal.
    */
   bool SignalOpen(ENUM_ORDER_TYPE _cmd, int _method = 0, double _level = 0.0) {
-    ResetLastError();
-    bool _result = false;
-    double bands_0_base = ((Indi_Bands *)this.Data()).GetValue(BAND_BASE, 0);
-    double bands_0_lower = ((Indi_Bands *)this.Data()).GetValue(BAND_LOWER, 0);
-    double bands_0_upper = ((Indi_Bands *)this.Data()).GetValue(BAND_UPPER, 0);
-    double bands_1_base = ((Indi_Bands *)this.Data()).GetValue(BAND_BASE, 1);
-    double bands_1_lower = ((Indi_Bands *)this.Data()).GetValue(BAND_LOWER, 1);
-    double bands_1_upper = ((Indi_Bands *)this.Data()).GetValue(BAND_UPPER, 1);
-    double bands_2_base = ((Indi_Bands *)this.Data()).GetValue(BAND_BASE, 2);
-    double bands_2_lower = ((Indi_Bands *)this.Data()).GetValue(BAND_LOWER, 2);
-    double bands_2_upper = ((Indi_Bands *)this.Data()).GetValue(BAND_UPPER, 2);
-    if (GetLastError() > 0) {
-      // Returns false when indicator data is not ready.
+    Chart *_chart = Chart();
+    Indicator *_indi = Data();
+    bool _is_valid = _indi[CURR].IsValid() && _indi[PREV].IsValid() && _indi[PPREV].IsValid();
+    bool _result = _is_valid;
+    if (!_result) {
+      // Returns false when indicator data is not valid.
       return false;
     }
-    double lowest = fmin(Low[CURR], fmin(Low[PREV], Low[FAR]));
-    double highest = fmax(High[CURR], fmax(High[PREV], High[FAR]));
     double level = _level * Chart().GetPipSize();
     switch (_cmd) {
       // Buy: price crossed lower line upwards (returned to it from below).
-      case ORDER_TYPE_BUY:
+      case ORDER_TYPE_BUY: {
         // Price value was lower than the lower band.
-        _result = (lowest > 0 && lowest < fmax(fmax(bands_0_lower, bands_1_lower), bands_2_lower)) - level;
+        double lowest_price = fmin(_chart.GetLow(CURR), fmin(_chart.GetLow(PREV), _chart.GetLow(PPREV)));
+        _result = (lowest_price < fmax(fmax(_indi[CURR].value[BAND_LOWER], _indi[PREV].value[BAND_LOWER]), _indi[PPREV].value[BAND_LOWER])) - level;
         if (_method != 0) {
-          if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[FAR]) < bands_0_lower;
-          if (METHOD(_method, 1)) _result &= (bands_0_lower > bands_2_lower);
-          if (METHOD(_method, 2)) _result &= (bands_0_base > bands_2_base);
-          if (METHOD(_method, 3)) _result &= (bands_0_upper > bands_2_upper);
-          if (METHOD(_method, 4)) _result &= highest > bands_0_base;
-          if (METHOD(_method, 5)) _result &= Open[CURR] < bands_0_base;
-          if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[FAR]) > bands_0_base;
+          if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[PPREV]) < _indi[CURR].value[BAND_LOWER];
+          if (METHOD(_method, 1)) _result &= (_indi[CURR].value[BAND_LOWER] > _indi[PPREV].value[BAND_LOWER]);
+          if (METHOD(_method, 2)) _result &= (_indi[CURR].value[BAND_BASE] > _indi[PPREV].value[BAND_BASE]);
+          if (METHOD(_method, 3)) _result &= (_indi[CURR].value[BAND_UPPER] > _indi[PPREV].value[BAND_UPPER]);
+          if (METHOD(_method, 4)) _result &= lowest_price < _indi[CURR].value[BAND_BASE];
+          if (METHOD(_method, 5)) _result &= Open[CURR] < _indi[CURR].value[BAND_BASE];
+          if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[PPREV]) > _indi[CURR].value[BAND_BASE];
         }
         break;
+      }
       // Sell: price crossed upper line downwards (returned to it from above).
-      case ORDER_TYPE_SELL:
+      case ORDER_TYPE_SELL: {
         // Price value was higher than the upper band.
-        _result = (lowest > 0 && highest > fmin(fmin(bands_0_upper, bands_1_upper), bands_2_upper)) + level;
+        double highest_price = fmin(_chart.GetHigh(CURR), fmin(_chart.GetHigh(PREV), _chart.GetHigh(PPREV)));
+        _result = (highest_price > fmin(fmin(_indi[CURR].value[BAND_UPPER], _indi[PREV].value[BAND_UPPER]), _indi[PPREV].value[BAND_UPPER])) + level;
         if (_method != 0) {
-          if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[FAR]) > bands_0_upper;
-          if (METHOD(_method, 1)) _result &= (bands_0_lower < bands_2_lower);
-          if (METHOD(_method, 2)) _result &= (bands_0_base < bands_2_base);
-          if (METHOD(_method, 3)) _result &= (bands_0_upper < bands_2_upper);
-          if (METHOD(_method, 4)) _result &= lowest < bands_0_base;
-          if (METHOD(_method, 5)) _result &= Open[CURR] > bands_0_base;
-          if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[FAR]) < bands_0_base;
+          if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[PPREV]) > _indi[CURR].value[BAND_UPPER];
+          if (METHOD(_method, 1)) _result &= (_indi[CURR].value[BAND_LOWER] < _indi[PPREV].value[BAND_LOWER]);
+          if (METHOD(_method, 2)) _result &= (_indi[CURR].value[BAND_BASE] < _indi[PPREV].value[BAND_BASE]);
+          if (METHOD(_method, 3)) _result &= (_indi[CURR].value[BAND_UPPER] < _indi[PPREV].value[BAND_UPPER]);
+          if (METHOD(_method, 4)) _result &= highest_price > _indi[CURR].value[BAND_BASE];
+          if (METHOD(_method, 5)) _result &= Open[CURR] > _indi[CURR].value[BAND_BASE];
+          if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[PPREV]) < _indi[CURR].value[BAND_BASE];
         }
         break;
+      }
     }
     return _result;
   }
@@ -199,46 +194,34 @@ class Stg_Bands : public Strategy {
    * Gets price limit value for profit take or stop loss.
    */
   double PriceLimit(ENUM_ORDER_TYPE _cmd, ENUM_ORDER_TYPE_VALUE _mode, int _method = 0, double _level = 0.0) {
+    Indicator *_indi = Data();
     double _trail = _level * Market().GetPipSize();
-    int _direction = Order::OrderDirection(_cmd) * (_mode == ORDER_TYPE_SL ? -1 : 1);
+    int _direction = Order::OrderDirection(_cmd, _mode);
     double _default_value = Market().GetCloseOffer(_cmd) + _trail * _direction;
     double _result = _default_value;
-    double bands_0_base = ((Indi_Bands *)this.Data()).GetValue(BAND_BASE, 0);
-    double bands_0_lower = ((Indi_Bands *)this.Data()).GetValue(BAND_LOWER, 0);
-    double bands_0_upper = ((Indi_Bands *)this.Data()).GetValue(BAND_UPPER, 0);
-    double bands_1_base = ((Indi_Bands *)this.Data()).GetValue(BAND_BASE, 1);
-    double bands_1_lower = ((Indi_Bands *)this.Data()).GetValue(BAND_LOWER, 1);
-    double bands_1_upper = ((Indi_Bands *)this.Data()).GetValue(BAND_UPPER, 1);
-    double bands_2_base = ((Indi_Bands *)this.Data()).GetValue(BAND_BASE, 2);
-    double bands_2_lower = ((Indi_Bands *)this.Data()).GetValue(BAND_LOWER, 2);
-    double bands_2_upper = ((Indi_Bands *)this.Data()).GetValue(BAND_UPPER, 2);
-    if (GetLastError() > ERR_INDICATOR_DATA_NOT_FOUND) {
-      // Returns false when indicator data is not ready.
-      return false;
-    }
     switch (_method) {
-      case 0: {
-        _result = (_direction > 0 ? bands_0_upper : bands_0_lower) + _trail * _direction;
-      }
-      case 1: {
-        _result = (_direction > 0 ? bands_1_upper : bands_1_lower) + _trail * _direction;
-      }
-      case 2: {
-        _result = (_direction > 0 ? bands_2_upper : bands_2_lower) + _trail * _direction;
-      }
-      case 3: {
-        _result = (_direction > 0 ? fmax(bands_1_upper, bands_2_upper) : fmin(bands_1_lower, bands_2_lower)) +
+      case 0:
+        _result = (_direction > 0 ? _indi[CURR].value[BAND_UPPER] : _indi[CURR].value[BAND_LOWER]) + _trail * _direction;
+        break;
+      case 1:
+        _result = (_direction > 0 ? _indi[PREV].value[BAND_UPPER] : _indi[PREV].value[BAND_LOWER]) + _trail * _direction;
+        break;
+      case 2:
+        _result = (_direction > 0 ? _indi[PPREV].value[BAND_UPPER] : _indi[PPREV].value[BAND_LOWER]) + _trail * _direction;
+        break;
+      case 3:
+        _result = (_direction > 0 ? fmax(_indi[PREV].value[BAND_UPPER], _indi[PPREV].value[BAND_UPPER]) : fmin(_indi[PREV].value[BAND_LOWER], _indi[PPREV].value[BAND_LOWER])) +
                   _trail * _direction;
-      }
-      case 4: {
-        _result = bands_0_base + _trail * _direction;
-      }
-      case 5: {
-        _result = bands_1_base + _trail * _direction;
-      }
-      case 6: {
-        _result = bands_2_base + _trail * _direction;
-      }
+        break;
+      case 4:
+        _result = _indi[CURR].value[BAND_BASE] + _trail * _direction;
+        break;
+      case 5:
+        _result = _indi[PREV].value[BAND_BASE] + _trail * _direction;
+        break;
+      case 6:
+        _result = _indi[PPREV].value[BAND_BASE] + _trail * _direction;
+        break;
     }
     return _result;
   }
