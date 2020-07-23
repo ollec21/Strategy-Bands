@@ -89,7 +89,7 @@ class Stg_Bands : public Strategy {
     BandsParams bands_params(_params.Bands_Period, _params.Bands_Deviation, Bands_HShift, Bands_Applied_Price);
     bands_params.SetTf(_tf);
     StgParams sparams(new Trade(_tf, _Symbol), new Indi_Bands(bands_params), NULL, NULL);
-    sparams.logger.SetLevel(_log_level);
+    sparams.logger.Ptr().SetLevel(_log_level);
     sparams.SetMagicNo(_magic_no);
     sparams.SetSignals(_params.Bands_SignalOpenMethod, _params.Bands_SignalOpenLevel,
                        _params.Bands_SignalOpenFilterMethod, _params.Bands_SignalOpenBoostMethod,
