@@ -6,18 +6,18 @@
 // User input params.
 INPUT int Bands_Period = 2;                                  // Period
 INPUT ENUM_APPLIED_PRICE Bands_Applied_Price = PRICE_CLOSE;  // Applied Price
-INPUT float Bands_Deviation = 0.3;                          // Deviation
+INPUT float Bands_Deviation = 0.3f;                          // Deviation
 INPUT int Bands_HShift = 0;                                  // Horizontal shift
 INPUT int Bands_Shift = 0;                                   // Shift (relative to the current bar, 0 - default)
 INPUT int Bands_SignalOpenMethod = 0;                        // Signal open method (-63-63)
-INPUT float Bands_SignalOpenLevel = 18;                     // Signal open level (-49-49)
+INPUT float Bands_SignalOpenLevel = 18;                      // Signal open level (-49-49)
 INPUT int Bands_SignalOpenFilterMethod = 18;                 // Signal open filter method (-49-49)
 INPUT int Bands_SignalOpenBoostMethod = 18;                  // Signal open boost method (-49-49)
 INPUT int Bands_SignalCloseMethod = 0;                       // Signal close method (-63-63)
-INPUT float Bands_SignalCloseLevel = 18;                    // Signal close level (-49-49)
+INPUT float Bands_SignalCloseLevel = 18;                     // Signal close level (-49-49)
 INPUT int Bands_PriceLimitMethod = 0;                        // Price limit method (0-6)
-INPUT float Bands_PriceLimitLevel = 10;                     // Price limit level
-INPUT float Bands_MaxSpread = 0;                            // Max spread to trade (pips)
+INPUT float Bands_PriceLimitLevel = 10;                      // Price limit level
+INPUT float Bands_MaxSpread = 0;                             // Max spread to trade (pips)
 
 // Includes.
 #include <EA31337-classes/Indicators/Indi_Bands.mqh>
@@ -26,19 +26,19 @@ INPUT float Bands_MaxSpread = 0;                            // Max spread to tra
 // Struct to define strategy parameters to override.
 struct Stg_Bands_Params : StgParams {
   unsigned int Bands_Period;
-  double Bands_Deviation;
+  float Bands_Deviation;
   int Bands_HShift;
   ENUM_APPLIED_PRICE Bands_Applied_Price;
   int Bands_Shift;
   int Bands_SignalOpenMethod;
-  double Bands_SignalOpenLevel;
+  float Bands_SignalOpenLevel;
   int Bands_SignalOpenFilterMethod;
   int Bands_SignalOpenBoostMethod;
   int Bands_SignalCloseMethod;
-  double Bands_SignalCloseLevel;
+  float Bands_SignalCloseLevel;
   int Bands_PriceLimitMethod;
-  double Bands_PriceLimitLevel;
-  double Bands_MaxSpread;
+  float Bands_PriceLimitLevel;
+  float Bands_MaxSpread;
 
   // Constructor: Set default param values.
   Stg_Bands_Params()
@@ -191,6 +191,6 @@ class Stg_Bands : public Strategy {
         break;
       }
     }
-    return _result;
+    return (float)_result;
   }
 };
