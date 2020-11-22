@@ -15,8 +15,8 @@ INPUT int Bands_SignalOpenFilterMethod = 18;  // Signal open filter method (-49-
 INPUT int Bands_SignalOpenBoostMethod = 18;   // Signal open boost method (-49-49)
 INPUT int Bands_SignalCloseMethod = 0;        // Signal close method (-63-63)
 INPUT float Bands_SignalCloseLevel = 18;      // Signal close level (-49-49)
-INPUT int Bands_PriceLimitMethod = 0;         // Price limit method (0-6)
-INPUT float Bands_PriceLimitLevel = 10;       // Price limit level
+INPUT int Bands_PriceStopMethod = 0;          // Price stop method (0-6)
+INPUT float Bands_PriceStopLevel = 10;        // Price stop level
 INPUT int Bands_TickFilterMethod = 0;         // Tick filter method
 INPUT float Bands_MaxSpread = 0;              // Max spread to trade (pips)
 INPUT int Bands_Shift = 0;                    // Shift (relative to the current bar, 0 - default)
@@ -46,7 +46,7 @@ struct Stg_Bands_Params_Defaults : StgParams {
   Stg_Bands_Params_Defaults()
       : StgParams(::Bands_SignalOpenMethod, ::Bands_SignalOpenFilterMethod, ::Bands_SignalOpenLevel,
                   ::Bands_SignalOpenBoostMethod, ::Bands_SignalCloseMethod, ::Bands_SignalCloseLevel,
-                  ::Bands_PriceLimitMethod, ::Bands_PriceLimitLevel, ::Bands_TickFilterMethod, ::Bands_MaxSpread,
+                  ::Bands_PriceStopMethod, ::Bands_PriceStopLevel, ::Bands_TickFilterMethod, ::Bands_MaxSpread,
                   ::Bands_Shift) {}
 } stg_bands_defaults;
 
@@ -154,9 +154,9 @@ class Stg_Bands : public Strategy {
   }
 
   /**
-   * Gets price limit value for profit take or stop loss.
+   * Gets price stop value for profit take or stop loss.
    */
-  float PriceLimit(ENUM_ORDER_TYPE _cmd, ENUM_ORDER_TYPE_VALUE _mode, int _method = 0, float _level = 0.0) {
+  float PriceStop(ENUM_ORDER_TYPE _cmd, ENUM_ORDER_TYPE_VALUE _mode, int _method = 0, float _level = 0.0) {
     Indi_Bands *_indi = Data();
     double _trail = _level * Market().GetPipSize();
     int _direction = Order::OrderDirection(_cmd, _mode);
