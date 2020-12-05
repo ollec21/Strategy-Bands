@@ -117,17 +117,17 @@ class Stg_Bands : public Strategy {
       case ORDER_TYPE_BUY: {
         // Price value was lower than the lower band.
         double lowest_price = fmin(_chart.GetLow(CURR), fmin(_chart.GetLow(PREV), _chart.GetLow(PPREV)));
-        _result = (lowest_price < fmax(fmax(_indi[CURR].value[BAND_LOWER], _indi[PREV].value[BAND_LOWER]),
-                                       _indi[PPREV].value[BAND_LOWER])) -
-                  level;
+        _result =
+            (lowest_price < fmax(fmax(_indi[CURR][BAND_LOWER], _indi[PREV][BAND_LOWER]), _indi[PPREV][BAND_LOWER])) -
+            level;
         if (_method != 0) {
-          if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[PPREV]) < _indi[CURR].value[BAND_LOWER];
-          if (METHOD(_method, 1)) _result &= (_indi[CURR].value[BAND_LOWER] > _indi[PPREV].value[BAND_LOWER]);
-          if (METHOD(_method, 2)) _result &= (_indi[CURR].value[BAND_BASE] > _indi[PPREV].value[BAND_BASE]);
-          if (METHOD(_method, 3)) _result &= (_indi[CURR].value[BAND_UPPER] > _indi[PPREV].value[BAND_UPPER]);
-          if (METHOD(_method, 4)) _result &= lowest_price < _indi[CURR].value[BAND_BASE];
-          if (METHOD(_method, 5)) _result &= Open[CURR] < _indi[CURR].value[BAND_BASE];
-          if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[PPREV]) > _indi[CURR].value[BAND_BASE];
+          if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[PPREV]) < _indi[CURR][BAND_LOWER];
+          if (METHOD(_method, 1)) _result &= (_indi[CURR][BAND_LOWER] > _indi[PPREV][BAND_LOWER]);
+          if (METHOD(_method, 2)) _result &= (_indi[CURR][BAND_BASE] > _indi[PPREV][BAND_BASE]);
+          if (METHOD(_method, 3)) _result &= (_indi[CURR][BAND_UPPER] > _indi[PPREV][BAND_UPPER]);
+          if (METHOD(_method, 4)) _result &= lowest_price < _indi[CURR][BAND_BASE];
+          if (METHOD(_method, 5)) _result &= Open[CURR] < _indi[CURR][BAND_BASE];
+          if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[PPREV]) > _indi[CURR][BAND_BASE];
         }
         break;
       }
@@ -135,17 +135,17 @@ class Stg_Bands : public Strategy {
       case ORDER_TYPE_SELL: {
         // Price value was higher than the upper band.
         double highest_price = fmin(_chart.GetHigh(CURR), fmin(_chart.GetHigh(PREV), _chart.GetHigh(PPREV)));
-        _result = (highest_price > fmin(fmin(_indi[CURR].value[BAND_UPPER], _indi[PREV].value[BAND_UPPER]),
-                                        _indi[PPREV].value[BAND_UPPER])) +
-                  level;
+        _result =
+            (highest_price > fmin(fmin(_indi[CURR][BAND_UPPER], _indi[PREV][BAND_UPPER]), _indi[PPREV][BAND_UPPER])) +
+            level;
         if (_method != 0) {
-          if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[PPREV]) > _indi[CURR].value[BAND_UPPER];
-          if (METHOD(_method, 1)) _result &= (_indi[CURR].value[BAND_LOWER] < _indi[PPREV].value[BAND_LOWER]);
-          if (METHOD(_method, 2)) _result &= (_indi[CURR].value[BAND_BASE] < _indi[PPREV].value[BAND_BASE]);
-          if (METHOD(_method, 3)) _result &= (_indi[CURR].value[BAND_UPPER] < _indi[PPREV].value[BAND_UPPER]);
-          if (METHOD(_method, 4)) _result &= highest_price > _indi[CURR].value[BAND_BASE];
-          if (METHOD(_method, 5)) _result &= Open[CURR] > _indi[CURR].value[BAND_BASE];
-          if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[PPREV]) < _indi[CURR].value[BAND_BASE];
+          if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[PPREV]) > _indi[CURR][BAND_UPPER];
+          if (METHOD(_method, 1)) _result &= (_indi[CURR][BAND_LOWER] < _indi[PPREV][BAND_LOWER]);
+          if (METHOD(_method, 2)) _result &= (_indi[CURR][BAND_BASE] < _indi[PPREV][BAND_BASE]);
+          if (METHOD(_method, 3)) _result &= (_indi[CURR][BAND_UPPER] < _indi[PPREV][BAND_UPPER]);
+          if (METHOD(_method, 4)) _result &= highest_price > _indi[CURR][BAND_BASE];
+          if (METHOD(_method, 5)) _result &= Open[CURR] > _indi[CURR][BAND_BASE];
+          if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[PPREV]) < _indi[CURR][BAND_BASE];
         }
         break;
       }
@@ -164,30 +164,27 @@ class Stg_Bands : public Strategy {
     double _result = _default_value;
     switch (_method) {
       case 1:
-        _result =
-            (_direction > 0 ? _indi[CURR].value[BAND_UPPER] : _indi[CURR].value[BAND_LOWER]) + _trail * _direction;
+        _result = (_direction > 0 ? _indi[CURR][BAND_UPPER] : _indi[CURR][BAND_LOWER]) + _trail * _direction;
         break;
       case 2:
-        _result =
-            (_direction > 0 ? _indi[PREV].value[BAND_UPPER] : _indi[PREV].value[BAND_LOWER]) + _trail * _direction;
+        _result = (_direction > 0 ? _indi[PREV][BAND_UPPER] : _indi[PREV][BAND_LOWER]) + _trail * _direction;
         break;
       case 3:
-        _result =
-            (_direction > 0 ? _indi[PPREV].value[BAND_UPPER] : _indi[PPREV].value[BAND_LOWER]) + _trail * _direction;
+        _result = (_direction > 0 ? _indi[PPREV][BAND_UPPER] : _indi[PPREV][BAND_LOWER]) + _trail * _direction;
         break;
       case 4:
-        _result = (_direction > 0 ? fmax(_indi[PREV].value[BAND_UPPER], _indi[PPREV].value[BAND_UPPER])
-                                  : fmin(_indi[PREV].value[BAND_LOWER], _indi[PPREV].value[BAND_LOWER])) +
+        _result = (_direction > 0 ? fmax(_indi[PREV][BAND_UPPER], _indi[PPREV][BAND_UPPER])
+                                  : fmin(_indi[PREV][BAND_LOWER], _indi[PPREV][BAND_LOWER])) +
                   _trail * _direction;
         break;
       case 5:
-        _result = _indi[CURR].value[BAND_BASE] + _trail * _direction;
+        _result = _indi[CURR][BAND_BASE] + _trail * _direction;
         break;
       case 6:
-        _result = _indi[PREV].value[BAND_BASE] + _trail * _direction;
+        _result = _indi[PREV][BAND_BASE] + _trail * _direction;
         break;
       case 7:
-        _result = _indi[PPREV].value[BAND_BASE] + _trail * _direction;
+        _result = _indi[PPREV][BAND_BASE] + _trail * _direction;
         break;
       case 8: {
         int _bar_count = (int)_level * (int)_indi.GetPeriod();
