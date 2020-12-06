@@ -3,10 +3,6 @@
  * Implements Bands strategy based on the Bollinger Bands indicator.
  */
 
-// Includes.
-#include <EA31337-classes/Indicators/Indi_Bands.mqh>
-#include <EA31337-classes/Strategy.mqh>
-
 // User input params.
 INPUT float Bands_LotSize = 0;                // Lot size
 INPUT int Bands_SignalOpenMethod = 0;         // Signal open method (-63-63)
