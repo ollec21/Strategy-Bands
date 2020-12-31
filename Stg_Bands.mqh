@@ -16,7 +16,7 @@ INPUT float Bands_PriceStopLevel = 10;        // Price stop level
 INPUT int Bands_TickFilterMethod = 0;         // Tick filter method
 INPUT float Bands_MaxSpread = 0;              // Max spread to trade (pips)
 INPUT int Bands_Shift = 0;                    // Shift (relative to the current bar, 0 - default)
-INPUT int Bands_OrderCloseTime = -10;         // Order close time in mins (>0) or bars (<0)
+INPUT int Bands_OrderCloseTime = -20;         // Order close time in mins (>0) or bars (<0)
 INPUT string __Bands_Indi_Bands_Parameters__ =
     "-- Bands strategy: Bands indicator params --";               // >>> Bands strategy: Bands indicator <<<
 INPUT int Indi_Bands_Period = 2;                                  // Period
@@ -104,47 +104,45 @@ class Stg_Bands : public Strategy {
     Indi_Bands *_indi = Data();
     bool _is_valid = _indi[CURR].IsValid() && _indi[PREV].IsValid() && _indi[PPREV].IsValid();
     bool _result = _is_valid;
-    if (!_result) {
-      // Returns false when indicator data is not valid.
-      return false;
-    }
-    double level = _level * Chart().GetPipSize();
-    switch (_cmd) {
-      // Buy: price crossed lower line upwards (returned to it from below).
-      case ORDER_TYPE_BUY: {
-        // Price value was lower than the lower band.
-        double lowest_price = fmin(_chart.GetLow(CURR), fmin(_chart.GetLow(PREV), _chart.GetLow(PPREV)));
-        _result = (lowest_price < fmax(fmax(_indi[CURR][(int)BAND_LOWER], _indi[PREV][(int)BAND_LOWER]),
-                                       _indi[PPREV][(int)BAND_LOWER])) -
-                  level;
-        if (_method != 0) {
-          if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[PPREV]) < _indi[CURR][(int)BAND_LOWER];
-          if (METHOD(_method, 1)) _result &= (_indi[CURR][(int)BAND_LOWER] > _indi[PPREV][(int)BAND_LOWER]);
-          if (METHOD(_method, 2)) _result &= (_indi[CURR][(int)BAND_BASE] > _indi[PPREV][(int)BAND_BASE]);
-          if (METHOD(_method, 3)) _result &= (_indi[CURR][(int)BAND_UPPER] > _indi[PPREV][(int)BAND_UPPER]);
-          if (METHOD(_method, 4)) _result &= lowest_price < _indi[CURR][(int)BAND_BASE];
-          if (METHOD(_method, 5)) _result &= Open[CURR] < _indi[CURR][(int)BAND_BASE];
-          if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[PPREV]) > _indi[CURR][(int)BAND_BASE];
+    if (_is_valid) {
+      double _change_pc = Math::ChangeInPct(_indi[1][(int)BAND_BASE], _indi[0][(int)BAND_BASE], true);
+      switch (_cmd) {
+        // Buy: price crossed lower line upwards (returned to it from below).
+        case ORDER_TYPE_BUY: {
+          // Price value was lower than the lower band.
+          double lowest_price = fmin3(_chart.GetLow(CURR), _chart.GetLow(PREV), _chart.GetLow(PPREV));
+          _result = (lowest_price <
+                     fmax3(_indi[CURR][(int)BAND_LOWER], _indi[PREV][(int)BAND_LOWER], _indi[PPREV][(int)BAND_LOWER]));
+          _result &= _change_pc > _level;
+          if (_result && _method != 0) {
+            if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[PPREV]) < _indi[CURR][(int)BAND_LOWER];
+            if (METHOD(_method, 1)) _result &= (_indi[CURR][(int)BAND_LOWER] > _indi[PPREV][(int)BAND_LOWER]);
+            if (METHOD(_method, 2)) _result &= (_indi[CURR][(int)BAND_BASE] > _indi[PPREV][(int)BAND_BASE]);
+            if (METHOD(_method, 3)) _result &= (_indi[CURR][(int)BAND_UPPER] > _indi[PPREV][(int)BAND_UPPER]);
+            if (METHOD(_method, 4)) _result &= lowest_price < _indi[CURR][(int)BAND_BASE];
+            if (METHOD(_method, 5)) _result &= Open[CURR] < _indi[CURR][(int)BAND_BASE];
+            if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[PPREV]) > _indi[CURR][(int)BAND_BASE];
+          }
+          break;
         }
-        break;
-      }
-      // Sell: price crossed upper line downwards (returned to it from above).
-      case ORDER_TYPE_SELL: {
-        // Price value was higher than the upper band.
-        double highest_price = fmin(_chart.GetHigh(CURR), fmin(_chart.GetHigh(PREV), _chart.GetHigh(PPREV)));
-        _result = (highest_price > fmin(fmin(_indi[CURR][(int)BAND_UPPER], _indi[PREV][(int)BAND_UPPER]),
-                                        _indi[PPREV][(int)BAND_UPPER])) +
-                  level;
-        if (_method != 0) {
-          if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[PPREV]) > _indi[CURR][(int)BAND_UPPER];
-          if (METHOD(_method, 1)) _result &= (_indi[CURR][(int)BAND_LOWER] < _indi[PPREV][(int)BAND_LOWER]);
-          if (METHOD(_method, 2)) _result &= (_indi[CURR][(int)BAND_BASE] < _indi[PPREV][(int)BAND_BASE]);
-          if (METHOD(_method, 3)) _result &= (_indi[CURR][(int)BAND_UPPER] < _indi[PPREV][(int)BAND_UPPER]);
-          if (METHOD(_method, 4)) _result &= highest_price > _indi[CURR][(int)BAND_BASE];
-          if (METHOD(_method, 5)) _result &= Open[CURR] > _indi[CURR][(int)BAND_BASE];
-          if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[PPREV]) < _indi[CURR][(int)BAND_BASE];
+        // Sell: price crossed upper line downwards (returned to it from above).
+        case ORDER_TYPE_SELL: {
+          // Price value was higher than the upper band.
+          double highest_price = fmin3(_chart.GetHigh(CURR), _chart.GetHigh(PREV), _chart.GetHigh(PPREV));
+          _result = (highest_price >
+                     fmin3(_indi[CURR][(int)BAND_UPPER], _indi[PREV][(int)BAND_UPPER], _indi[PPREV][(int)BAND_UPPER]));
+          _result &= _change_pc < _level;
+          if (_result && _method != 0) {
+            if (METHOD(_method, 0)) _result &= fmin(Close[PREV], Close[PPREV]) > _indi[CURR][(int)BAND_UPPER];
+            if (METHOD(_method, 1)) _result &= (_indi[CURR][(int)BAND_LOWER] < _indi[PPREV][(int)BAND_LOWER]);
+            if (METHOD(_method, 2)) _result &= (_indi[CURR][(int)BAND_BASE] < _indi[PPREV][(int)BAND_BASE]);
+            if (METHOD(_method, 3)) _result &= (_indi[CURR][(int)BAND_UPPER] < _indi[PPREV][(int)BAND_UPPER]);
+            if (METHOD(_method, 4)) _result &= highest_price > _indi[CURR][(int)BAND_BASE];
+            if (METHOD(_method, 5)) _result &= Open[CURR] > _indi[CURR][(int)BAND_BASE];
+            if (METHOD(_method, 6)) _result &= fmin(Close[PREV], Close[PPREV]) < _indi[CURR][(int)BAND_BASE];
+          }
+          break;
         }
-        break;
       }
     }
     return _result;
@@ -155,10 +153,14 @@ class Stg_Bands : public Strategy {
    */
   float PriceStop(ENUM_ORDER_TYPE _cmd, ENUM_ORDER_TYPE_VALUE _mode, int _method = 0, float _level = 0.0) {
     Indi_Bands *_indi = Data();
-    double _trail = _level * Market().GetPipSize();
+    Chart *_chart = sparams.GetChart();
+    double _trail = _level * _chart.GetPipSize();
     int _direction = Order::OrderDirection(_cmd, _mode);
-    double _default_value = Market().GetCloseOffer(_cmd) + _trail * _direction;
+    double _change_pc = Math::ChangeInPct(_indi[1][(int)BAND_BASE], _indi[0][(int)BAND_BASE]);
+    double _default_value = _chart.GetCloseOffer(_cmd) + _trail * _method * _direction;
+    double _price_offer = _chart.GetOpenOffer(_cmd);
     double _result = _default_value;
+    ENUM_APPLIED_PRICE _ap = _direction > 0 ? PRICE_HIGH : PRICE_LOW;
     switch (_method) {
       case 1:
         _result = (_direction > 0 ? _indi[CURR][(int)BAND_UPPER] : _indi[CURR][(int)BAND_LOWER]) + _trail * _direction;
@@ -190,6 +192,9 @@ class Stg_Bands : public Strategy {
                                  : _indi.GetPrice(PRICE_LOW, _indi.GetLowest<double>(_bar_count));
         break;
       }
+      case 9:
+        _result = Math::ChangeByPct(_price_offer, (float)(_change_pc / Math::NonZero(_level)));
+        break;
     }
     return (float)_result;
   }
