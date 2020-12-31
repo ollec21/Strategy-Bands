@@ -5,7 +5,13 @@
 
 // Defines indicator's parameter values for the given pair symbol and timeframe.
 struct Indi_Bands_Params_H8 : Indi_Bands_Params {
-  Indi_Bands_Params_H8() : Indi_Bands_Params(indi_bands_defaults, PERIOD_H8) { shift = 0; }
+  Indi_Bands_Params_H8() : Indi_Bands_Params(indi_bands_defaults, PERIOD_H8) {
+    applied_price = (ENUM_APPLIED_PRICE)0;
+    bshift = 0;
+    deviation = 1.7;
+    period = 22;
+    shift = 0;
+  }
 } indi_bands_h8;
 
 // Defines strategy's parameter values for the given pair symbol and timeframe.
