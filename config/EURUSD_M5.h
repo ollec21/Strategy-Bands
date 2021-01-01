@@ -9,7 +9,7 @@ struct Indi_Bands_Params_M5 : Indi_Bands_Params {
     applied_price = (ENUM_APPLIED_PRICE)0;
     bshift = 5;
     deviation = 1.7;
-    period = 16;
+    period = 20;
     shift = 0;
   }
 } indi_bands_m5;
