@@ -26,7 +26,7 @@ jobs:
         with:
           include: .
           init-platform: true
-          mt-vebandson: 5.0.0.2361
+          mt-version: 5.0.0.2361
           path: Stg_Bands.mq4
           verbose: true
       - name: Copy Math includes
@@ -35,7 +35,7 @@ jobs:
         uses: fx31337/mql-compile-action@master
         with:
           include: .
-          mt-vebandson: 5.0.0.2515
+          mt-version: 5.0.0.2515
           path: Stg_Bands.mq5
           verbose: true
       - name: List compiled files
