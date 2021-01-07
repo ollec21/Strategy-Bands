@@ -1,8 +1,8 @@
 Bands_Indi_Bands_Applied_Price={{ applied_price | replace("(ENUM_APPLIED_PRICE)", "") | int | default(0) }}
 Bands_Indi_Bands_Deviation={{ deviation | default(0) }}
-Bands_Indi_Bands_HShift,1=0
+Bands_Indi_Bands_HShift,1={{ (bshift | default(0) | int) - 2 }}
 Bands_Indi_Bands_HShift,2=1
-Bands_Indi_Bands_HShift,3=6
+Bands_Indi_Bands_HShift,3={{ (bshift | default(0) | int) + 2 }}
 Bands_Indi_Bands_HShift,F=1
 Bands_Indi_Bands_HShift={{ bshift | default(0) }}
 Bands_Indi_Bands_MA_Method={{ ma_method | default(0) }}
