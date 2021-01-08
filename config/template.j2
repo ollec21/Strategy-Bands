@@ -26,7 +26,7 @@ struct Stg_Bands_Params_{{ Timeframe }} : StgParams {
     signal_close_method = {{ Bands_SignalCloseMethod | default(0) }};
     signal_close_level = (float){{ Bands_SignalCloseLevel | default(0) }};
     price_stop_method = {{ Bands_PriceStopMethod | default(0) }};
-    price_stop_level = {{ Bands_SignalCloseLevel | default(1) }};
+    price_stop_level = (float){{ Bands_SignalCloseLevel | default(1) }};
     tick_filter_method = {{ Bands_TickFilterMethod  | default(1) }};
     max_spread = {{ Bands_MaxSpread | default(0) }};
   }
