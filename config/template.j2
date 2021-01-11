@@ -4,8 +4,8 @@
  */
 
 // Defines indicator's parameter values for the given pair symbol and timeframe.
-struct Indi_Bands_Params_{{ Timeframe }} : Indi_Bands_Params {
-  Indi_Bands_Params_{{ Timeframe }}() : Indi_Bands_Params(indi_bands_defaults, PERIOD_{{ Timeframe }}) {
+struct Indi_Bands_Params_{{ Timeframe }} : BandsParams {
+  Indi_Bands_Params_{{ Timeframe }}() : BandsParams(indi_bands_defaults, PERIOD_{{ Timeframe }}) {
     applied_price = (ENUM_APPLIED_PRICE){{ Bands_Indi_Bands_Applied_Price | default(0) }};
     deviation = {{ Envelopes_Indi_Envelopes_Deviation | default(0) }};
     period = {{ Bands_Indi_Bands_Period | default(0) }};

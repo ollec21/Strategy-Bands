@@ -23,6 +23,7 @@ INPUT int Bands_Indi_Bands_Period = 2;                                  // Perio
 INPUT float Bands_Indi_Bands_Deviation = 0.3f;                          // Deviation
 INPUT int Bands_Indi_Bands_HShift = 0;                                  // Horizontal shift
 INPUT ENUM_APPLIED_PRICE Bands_Indi_Bands_Applied_Price = PRICE_CLOSE;  // Applied Price
+INPUT int Bands_Indi_Bands_Shift = 0;                                   // Shift
 
 // Structs.
 
@@ -30,14 +31,8 @@ INPUT ENUM_APPLIED_PRICE Bands_Indi_Bands_Applied_Price = PRICE_CLOSE;  // Appli
 struct Indi_Bands_Params_Defaults : BandsParams {
   Indi_Bands_Params_Defaults()
       : BandsParams(::Bands_Indi_Bands_Period, ::Bands_Indi_Bands_Deviation, ::Bands_Indi_Bands_HShift,
-                    ::Bands_Indi_Bands_Applied_Price) {}
+                    ::Bands_Indi_Bands_Applied_Price, ::Bands_Indi_Bands_Shift) {}
 } indi_bands_defaults;
-
-// Defines struct to store indicator parameter values.
-struct Indi_Bands_Params : public BandsParams {
-  // Struct constructors.
-  void Indi_Bands_Params(BandsParams &_params, ENUM_TIMEFRAMES _tf) : BandsParams(_params, _tf) {}
-};
 
 // Defines struct with default user strategy values.
 struct Stg_Bands_Params_Defaults : StgParams {
@@ -50,11 +45,11 @@ struct Stg_Bands_Params_Defaults : StgParams {
 
 // Struct to define strategy parameters to override.
 struct Stg_Bands_Params : StgParams {
-  Indi_Bands_Params iparams;
+  BandsParams iparams;
   StgParams sparams;
 
   // Struct constructors.
-  Stg_Bands_Params(Indi_Bands_Params &_iparams, StgParams &_sparams)
+  Stg_Bands_Params(BandsParams &_iparams, StgParams &_sparams)
       : iparams(indi_bands_defaults, _iparams.tf), sparams(stg_bands_defaults) {
     iparams = _iparams;
     sparams = _sparams;
@@ -76,11 +71,11 @@ class Stg_Bands : public Strategy {
 
   static Stg_Bands *Init(ENUM_TIMEFRAMES _tf = NULL, long _magic_no = NULL, ENUM_LOG_LEVEL _log_level = V_INFO) {
     // Initialize strategy initial values.
-    Indi_Bands_Params _indi_params(indi_bands_defaults, _tf);
+    BandsParams _indi_params(indi_bands_defaults, _tf);
     StgParams _stg_params(stg_bands_defaults);
     if (!Terminal::IsOptimization()) {
-      SetParamsByTf<Indi_Bands_Params>(_indi_params, _tf, indi_bands_m1, indi_bands_m5, indi_bands_m15, indi_bands_m30,
-                                       indi_bands_h1, indi_bands_h4, indi_bands_h8);
+      SetParamsByTf<BandsParams>(_indi_params, _tf, indi_bands_m1, indi_bands_m5, indi_bands_m15, indi_bands_m30,
+                                 indi_bands_h1, indi_bands_h4, indi_bands_h8);
       SetParamsByTf<StgParams>(_stg_params, _tf, stg_bands_m1, stg_bands_m5, stg_bands_m15, stg_bands_m30, stg_bands_h1,
                                stg_bands_h4, stg_bands_h8);
     }
