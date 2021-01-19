@@ -7,7 +7,7 @@
 struct Indi_Bands_Params_{{ Timeframe }} : BandsParams {
   Indi_Bands_Params_{{ Timeframe }}() : BandsParams(indi_bands_defaults, PERIOD_{{ Timeframe }}) {
     applied_price = (ENUM_APPLIED_PRICE){{ Bands_Indi_Bands_Applied_Price | default(0) }};
-    deviation = {{ Envelopes_Indi_Envelopes_Deviation | default(0) }};
+    deviation = {{ Bands_Indi_Bands_Deviation | default(0) | float }};
     period = {{ Bands_Indi_Bands_Period | default(0) }};
     bshift = {{ Bands_Indi_Bands_HShift | default(0) }};
     shift = {{ Bands_Indi_Bands_Shift | default(0) }};
