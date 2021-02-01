@@ -74,12 +74,12 @@ class Stg_Bands : public Strategy {
     // Initialize strategy initial values.
     BandsParams _indi_params(indi_bands_defaults, _tf);
     StgParams _stg_params(stg_bands_defaults);
-    if (!Terminal::IsOptimization()) {
-      SetParamsByTf<BandsParams>(_indi_params, _tf, indi_bands_m1, indi_bands_m5, indi_bands_m15, indi_bands_m30,
-                                 indi_bands_h1, indi_bands_h4, indi_bands_h8);
-      SetParamsByTf<StgParams>(_stg_params, _tf, stg_bands_m1, stg_bands_m5, stg_bands_m15, stg_bands_m30, stg_bands_h1,
-                               stg_bands_h4, stg_bands_h8);
-    }
+#ifdef __config__
+    SetParamsByTf<BandsParams>(_indi_params, _tf, indi_bands_m1, indi_bands_m5, indi_bands_m15, indi_bands_m30,
+                               indi_bands_h1, indi_bands_h4, indi_bands_h8);
+    SetParamsByTf<StgParams>(_stg_params, _tf, stg_bands_m1, stg_bands_m5, stg_bands_m15, stg_bands_m30, stg_bands_h1,
+                             stg_bands_h4, stg_bands_h8);
+#endif
     // Initialize indicator.
     BandsParams bands_params(_indi_params);
     _stg_params.SetIndicator(new Indi_Bands(_indi_params));
