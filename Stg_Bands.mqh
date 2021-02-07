@@ -4,19 +4,20 @@
  */
 
 // User input params.
-INPUT float Bands_LotSize = 0;               // Lot size
-INPUT int Bands_SignalOpenMethod = 0;        // Signal open method (-63-63)
-INPUT float Bands_SignalOpenLevel = 0.0f;    // Signal open level (-49-49)
-INPUT int Bands_SignalOpenFilterMethod = 1;  // Signal open filter method (-49-49)
-INPUT int Bands_SignalOpenBoostMethod = 18;  // Signal open boost method (-49-49)
-INPUT int Bands_SignalCloseMethod = 0;       // Signal close method (-63-63)
-INPUT float Bands_SignalCloseLevel = 0.0f;   // Signal close level (-49-49)
-INPUT int Bands_PriceStopMethod = 0;         // Price stop method (0-6)
-INPUT float Bands_PriceStopLevel = 10;       // Price stop level
-INPUT int Bands_TickFilterMethod = 1;        // Tick filter method
-INPUT float Bands_MaxSpread = 4.0;           // Max spread to trade (pips)
-INPUT int Bands_Shift = 0;                   // Shift (relative to the current bar, 0 - default)
-INPUT int Bands_OrderCloseTime = -20;        // Order close time in mins (>0) or bars (<0)
+INPUT string __Bands_Parameters__ = "-- Bands strategy params --";  // >>> BANDS <<<
+INPUT float Bands_LotSize = 0;                                      // Lot size
+INPUT int Bands_SignalOpenMethod = 0;                               // Signal open method (-63-63)
+INPUT float Bands_SignalOpenLevel = 0.0f;                           // Signal open level (-49-49)
+INPUT int Bands_SignalOpenFilterMethod = 1;                         // Signal open filter method (-49-49)
+INPUT int Bands_SignalOpenBoostMethod = 0;                          // Signal open boost method (-49-49)
+INPUT int Bands_SignalCloseMethod = 0;                              // Signal close method (-63-63)
+INPUT float Bands_SignalCloseLevel = 0.0f;                          // Signal close level (-49-49)
+INPUT int Bands_PriceStopMethod = 0;                                // Price stop method (0-6)
+INPUT float Bands_PriceStopLevel = 10;                              // Price stop level
+INPUT int Bands_TickFilterMethod = 1;                               // Tick filter method
+INPUT float Bands_MaxSpread = 4.0;                                  // Max spread to trade (pips)
+INPUT int Bands_Shift = 0;                                          // Shift (relative to the current bar, 0 - default)
+INPUT int Bands_OrderCloseTime = -20;                               // Order close time in mins (>0) or bars (<0)
 INPUT string __Bands_Indi_Bands_Parameters__ =
     "-- Bands strategy: Bands indicator params --";                     // >>> Bands strategy: Bands indicator <<<
 INPUT int Bands_Indi_Bands_Period = 2;                                  // Period
@@ -73,12 +74,12 @@ class Stg_Bands : public Strategy {
     // Initialize strategy initial values.
     BandsParams _indi_params(indi_bands_defaults, _tf);
     StgParams _stg_params(stg_bands_defaults);
-    if (!Terminal::IsOptimization()) {
-      SetParamsByTf<BandsParams>(_indi_params, _tf, indi_bands_m1, indi_bands_m5, indi_bands_m15, indi_bands_m30,
-                                 indi_bands_h1, indi_bands_h4, indi_bands_h8);
-      SetParamsByTf<StgParams>(_stg_params, _tf, stg_bands_m1, stg_bands_m5, stg_bands_m15, stg_bands_m30, stg_bands_h1,
-                               stg_bands_h4, stg_bands_h8);
-    }
+#ifdef __config__
+    SetParamsByTf<BandsParams>(_indi_params, _tf, indi_bands_m1, indi_bands_m5, indi_bands_m15, indi_bands_m30,
+                               indi_bands_h1, indi_bands_h4, indi_bands_h8);
+    SetParamsByTf<StgParams>(_stg_params, _tf, stg_bands_m1, stg_bands_m5, stg_bands_m15, stg_bands_m30, stg_bands_h1,
+                             stg_bands_h4, stg_bands_h8);
+#endif
     // Initialize indicator.
     BandsParams bands_params(_indi_params);
     _stg_params.SetIndicator(new Indi_Bands(_indi_params));
@@ -88,7 +89,6 @@ class Stg_Bands : public Strategy {
     _stg_params.SetTf(_tf, _Symbol);
     // Initialize strategy instance.
     Strategy *_strat = new Stg_Bands(_stg_params, "Bands");
-    _stg_params.SetStops(_strat, _strat);
     return _strat;
   }
 
